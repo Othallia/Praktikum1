@@ -40,7 +40,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        
         .fancy-title {
             display: flex;
             align-items: center;
@@ -62,16 +61,12 @@
             font-size: 2.8rem;
             font-weight: 700;
             text-align: center;
-            
-            /* Efek Teks Gradien */
             background: linear-gradient(90deg, #ffffff, #c2e9fb, #ffffff, #c2e9fb);
             background-size: 200% auto;
             color: #fff;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            
-            /* Animasi Gradien Bergerak */
             animation: text-shine 5s linear infinite;
         }
 
@@ -153,47 +148,28 @@
 
     <div class="weather-card" id="weatherCard">
         <div class="main-info">
-            <div class="animated-item">
-                <i class="fas fa-sun main-icon" id="mainWeatherIcon"></i>
-            </div>
-            <div class="animated-item">
-                <div class="temperature" id="infoSuhu">-</div>
-            </div>
-            <div class="animated-item">
-                <div class="location" id="displayLokasi">-</div>
-            </div>
+            <div class="animated-item"><i class="fas fa-sun main-icon" id="mainWeatherIcon"></i></div>
+            <div class="animated-item"><div class="temperature" id="infoSuhu">-</div></div>
+            <div class="animated-item"><div class="location" id="displayLokasi">-</div></div>
         </div>
         <div class="details-info">
             <div class="search-box">
-                <input type="text" id="inputLokasi" value="Yogyakarta" placeholder="Cari lokasi...">
+                <input type="text" id="inputLokasi" placeholder="Cari lokasi...">
                 <button id="tombolGet"><i class="fas fa-search"></i></button>
             </div>
             <div class="details-grid">
-                <div class="info-item animated-item">
-                    <div class="label">Kondisi</div><div class="value" id="infoKondisi">-</div>
-                </div>
-                <div class="info-item animated-item">
-                    <div class="label">Kelembaban</div><div class="value" id="infoKelembaban">-</div>
-                </div>
-                <div class="info-item animated-item">
-                    <div class="label">Provinsi</div><div class="value" id="infoProvinsi">-</div>
-                </div>
-                <div class="info-item animated-item">
-                    <div class="label">Negara</div><div class="value" id="infoNegara">-</div>
-                </div>
-                <div class="info-item animated-item">
-                    <div class="label">Latitude</div><div class="value" id="infoLat">-</div>
-                </div>
-                <div class="info-item animated-item">
-                    <div class="label">Longitude</div><div class="value" id="infoLon">-</div>
-                </div>
+                <div class="info-item animated-item"><div class="label">Kondisi</div><div class="value" id="infoKondisi">-</div></div>
+                <div class="info-item animated-item"><div class="label">Kelembaban</div><div class="value" id="infoKelembaban">-</div></div>
+                <div class="info-item animated-item"><div class="label">Provinsi</div><div class="value" id="infoProvinsi">-</div></div>
+                <div class="info-item animated-item"><div class="label">Negara</div><div class="value" id="infoNegara">-</div></div>
+                <div class="info-item animated-item"><div class="label">Latitude</div><div class="value" id="infoLat">-</div></div>
+                <div class="info-item animated-item"><div class="label">Longitude</div><div class="value" id="infoLon">-</div></div>
             </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
-        // Tidak ada perubahan sama sekali pada JavaScript
         function getWeatherIcon(code, is_day) {
             switch (code) {
                 case 1000: return is_day ? 'fas fa-sun' : 'fas fa-moon';
@@ -208,11 +184,15 @@
                 default: return 'fas fa-cloud';
             }
         }
-        function getWeatherData() {
-            const kota = $('#inputLokasi').val(); if (!kota) return;
+
+        function getWeatherData(lokasiQuery) {
+            const kota = lokasiQuery || $('#inputLokasi').val();
+            if (!kota) return;
+
             $('.animated-item').css({'opacity': '0', 'transform': 'translateY(15px)', 'animation': 'none'});
             const apiKey = "7253c12fe78d46d18ae40453250610";
             const urlApi = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${kota}&aqi=no`;
+
             setTimeout(() => {
                 $.ajax({
                     url: urlApi, method: "GET",
@@ -225,6 +205,7 @@
                         $('#infoLat').text(lat); $('#infoLon').text(lon);
                         const iconClass = getWeatherIcon(condition.code, is_day);
                         $('#mainWeatherIcon').attr('class', `${iconClass} main-icon`);
+                        if (lokasiQuery) { $('#inputLokasi').val(name); }
                         $('.animated-item').each(function(index) {
                             $(this).css({'animation': '', 'animation-delay': `${index * 50}ms`});
                         });
@@ -233,10 +214,26 @@
                 });
             }, 500);
         }
+
         $(document).ready(function() {
-            getWeatherData();
-            $('#tombolGet').on('click', getWeatherData);
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(posisi) {
+                    const lat = posisi.coords.latitude;
+                    const lon = posisi.coords.longitude;
+                    const koordinat = `${lat},${lon}`;
+                    getWeatherData(koordinat);
+                }, function() {
+                    console.log("Gagal mendapatkan lokasi, menggunakan lokasi cadangan.");
+                    getWeatherData("Jakarta");
+                });
+            } else {
+                console.log("Browser tidak mendukung Geolocation, menggunakan lokasi cadangan.");
+                getWeatherData("Jakarta");
+            }
+
+            $('#tombolGet').on('click', function() { getWeatherData(); });
             $('#inputLokasi').on('keypress', function(e) { if (e.which === 13) { e.preventDefault(); getWeatherData(); }});
+            
             const card = $('#weatherCard');
             card.on('mousemove', function(e) {
                 let rect = e.target.getBoundingClientRect(); let x = e.clientX - rect.left; let y = e.clientY - rect.top;
@@ -244,6 +241,5 @@
             });
         });
     </script>
-
 </body>
 </html>
