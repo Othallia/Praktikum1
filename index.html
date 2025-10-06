@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atmosferia Weather</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --calm-bg-start: #6a85b6;
+            --calm-bg-end: #bac8e0;
+            --calm-card-bg: rgba(255, 255, 255, 0.65);
+            --calm-text-primary: #2c3e50;
+            --calm-text-secondary: #5a6f7e;
+            --calm-accent: #5a76a8;
+            --calm-shadow: rgba(44, 62, 80, 0.12);
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--calm-bg-start), var(--calm-bg-end));
+            background-size: 200% 200%;
+            animation: gradient-flow 15s ease-in-out infinite;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        
+        .fancy-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .fancy-title .icon {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #ffffff, #c2e9fb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 8px rgba(44, 62, 80, 0.2);
+        }
+        
+        .fancy-title span {
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-align: center;
+            
+            /* Efek Teks Gradien */
+            background: linear-gradient(90deg, #ffffff, #c2e9fb, #ffffff, #c2e9fb);
+            background-size: 200% auto;
+            color: #fff;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            
+            /* Animasi Gradien Bergerak */
+            animation: text-shine 5s linear infinite;
+        }
+
+        @keyframes text-shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .weather-card {
+            display: flex;
+            background-color: var(--calm-card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 32px var(--calm-shadow);
+            width: 100%;
+            max-width: 650px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .weather-card::before {
+            content: ''; position: absolute; top: var(--y, 0); left: var(--x, 0);
+            transform: translate(-50%, -50%); width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent 50%);
+            opacity: 0; transition: opacity 0.4s ease-out; pointer-events: none;
+        }
+        .weather-card:hover::before { opacity: 1; }
+
+        .main-info {
+            background-color: rgba(255, 255, 255, 0.3); padding: 30px; width: 45%; text-align: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: var(--calm-text-primary);
+        }
+
+        .main-info .main-icon { font-size: 5rem; color: var(--calm-accent); }
+        .main-info .temperature { font-size: 3rem; font-weight: 600; margin: 10px 0; }
+        .main-info .location { font-size: 1.2rem; font-weight: 400; }
+
+        .details-info { padding: 30px; width: 55%; }
+
+        .search-box { display: flex; gap: 8px; margin-bottom: 25px; }
+        .search-box input {
+            flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff;
+            font-family: 'Nunito', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.3s;
+        }
+        .search-box input:focus { border-color: var(--calm-accent); }
+        .search-box button {
+            background-color: var(--calm-accent); color: white; border: none; border-radius: 8px;
+            width: 40px; height: 40px; cursor: pointer; transition: background-color 0.3s;
+        }
+        .search-box button:hover { background-color: #4a6491; }
+        
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .info-item { padding: 10px; }
+        .info-item .label { font-size: 0.85rem; color: var(--calm-text-secondary); margin-bottom: 2px; }
+        .info-item .value { font-size: 1.05rem; font-weight: 600; color: var(--calm-text-primary); }
+
+        .animated-item {
+            opacity: 0; transform: translateY(15px); animation: fade-in-up 0.6s ease forwards;
+        }
+        @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
+        
+        @media (max-width: 700px) {
+            .weather-card { flex-direction: column; max-width: 350px; }
+            .main-info, .details-info { width: auto; }
+            .fancy-title span { font-size: 2rem; }
+            .fancy-title .icon { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="fancy-title">
+        <i class="fas fa-cloud-sun icon"></i>
+        <span>Atmosferia</span>
+    </div>
+
+    <div class="weather-card" id="weatherCard">
+        <div class="main-info">
+            <div class="animated-item">
+                <i class="fas fa-sun main-icon" id="mainWeatherIcon"></i>
+            </div>
+            <div class="animated-item">
+                <div class="temperature" id="infoSuhu">-</div>
+            </div>
+            <div class="animated-item">
+                <div class="location" id="displayLokasi">-</div>
+            </div>
+        </div>
+        <div class="details-info">
+            <div class="search-box">
+                <input type="text" id="inputLokasi" value="Yogyakarta" placeholder="Cari lokasi...">
+                <button id="tombolGet"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="details-grid">
+                <div class="info-item animated-item">
+                    <div class="label">Kondisi</div><div class="value" id="infoKondisi">-</div>
+                </div>
+                <div class="info-item animated-item">
+                    <div class="label">Kelembaban</div><div class="value" id="infoKelembaban">-</div>
+                </div>
+                <div class="info-item animated-item">
+                    <div class="label">Provinsi</div><div class="value" id="infoProvinsi">-</div>
+                </div>
+                <div class="info-item animated-item">
+                    <div class="label">Negara</div><div class="value" id="infoNegara">-</div>
+                </div>
+                <div class="info-item animated-item">
+                    <div class="label">Latitude</div><div class="value" id="infoLat">-</div>
+                </div>
+                <div class="info-item animated-item">
+                    <div class="label">Longitude</div><div class="value" id="infoLon">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        // Tidak ada perubahan sama sekali pada JavaScript
+        function getWeatherIcon(code, is_day) {
+            switch (code) {
+                case 1000: return is_day ? 'fas fa-sun' : 'fas fa-moon';
+                case 1003: return 'fas fa-cloud-sun';
+                case 1006: return 'fas fa-cloud';
+                case 1009: return 'fas fa-cloud-meatball';
+                case 1030: case 1135: return 'fas fa-smog';
+                case 1063: case 1180: case 1183: case 1186: case 1189: case 1240: return 'fas fa-cloud-showers-heavy';
+                case 1273: case 1276: return 'fas fa-bolt';
+                case 1066: case 1210: case 1213: case 1255: return 'fas fa-snowflake';
+                case 1087: return 'fas fa-poo-storm';
+                default: return 'fas fa-cloud';
+            }
+        }
+        function getWeatherData() {
+            const kota = $('#inputLokasi').val(); if (!kota) return;
+            $('.animated-item').css({'opacity': '0', 'transform': 'translateY(15px)', 'animation': 'none'});
+            const apiKey = "7253c12fe78d46d18ae40453250610";
+            const urlApi = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${kota}&aqi=no`;
+            setTimeout(() => {
+                $.ajax({
+                    url: urlApi, method: "GET",
+                    success: function(data) {
+                        const { location, current } = data;
+                        const { name, region, country, lat, lon } = location;
+                        const { temp_c, humidity, condition, is_day } = current;
+                        $('#displayLokasi').text(name); $('#infoSuhu').text(`${temp_c}°`); $('#infoKondisi').text(condition.text);
+                        $('#infoKelembaban').text(`${humidity}%`); $('#infoProvinsi').text(region); $('#infoNegara').text(country);
+                        $('#infoLat').text(lat); $('#infoLon').text(lon);
+                        const iconClass = getWeatherIcon(condition.code, is_day);
+                        $('#mainWeatherIcon').attr('class', `${iconClass} main-icon`);
+                        $('.animated-item').each(function(index) {
+                            $(this).css({'animation': '', 'animation-delay': `${index * 50}ms`});
+                        });
+                    },
+                    error: function(error) { alert("Lokasi tidak ditemukan."); }
+                });
+            }, 500);
+        }
+        $(document).ready(function() {
+            getWeatherData();
+            $('#tombolGet').on('click', getWeatherData);
+            $('#inputLokasi').on('keypress', function(e) { if (e.which === 13) { e.preventDefault(); getWeatherData(); }});
+            const card = $('#weatherCard');
+            card.on('mousemove', function(e) {
+                let rect = e.target.getBoundingClientRect(); let x = e.clientX - rect.left; let y = e.clientY - rect.top;
+                card.css('--x', `${x}px`); card.css('--y', `${y}px`);
+            });
+        });
+    </script>
+
+</body>
+</html>
